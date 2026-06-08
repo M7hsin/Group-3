@@ -1,114 +1,184 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teka Nombor</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <div class="wrapper">
+    <div class="card">
 
-<h2 class="sr-only">Permainan Teka Nombor menggunakan jQuery</h2>
+      <div class="label">Permainan</div>
+      <h1 class="title">Teka<br><span>Nombor.</span></h1>
 
-<div style="max-width: 420px; margin: 2rem auto; padding: 0 1rem;">
+      <!-- Range selection -->
+      <div class="range-row">
+        <div class="range-field">
+          <label>Min</label>
+          <input type="number" id="range-min" value="1" min="0">
+        </div>
+        <div class="range-sep">—</div>
+        <div class="range-field">
+          <label>Max</label>
+          <input type="number" id="range-max" value="100" min="1">
+        </div>
+      </div>
 
-  <div style="background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.5rem;">
+      <button class="btn btn-ghost" id="btn-generate" style="width:100%; margin-bottom:0;">Jana Nombor Random</button>
 
-    <p style="font-size: 13px; color: var(--color-text-secondary); margin: 0 0 1.5rem;">Nombor rawak dijana antara 1 hingga 100. Cuba teka!</p>
+      <div class="divider"></div>
 
-    <div style="display: flex; gap: 8px; margin-bottom: 1rem;">
-      <input type="number" id="guess-input" min="1" max="100" placeholder="Masukkan nombor..." style="flex: 1; font-size: 15px;" />
-      <button id="guess-btn" style="padding: 0 1.25rem; font-size: 14px; cursor: pointer;">Teka</button>
+      <!-- Secret number display -->
+      <div class="secret-block">
+        <div class="label">Nombor Rahsia</div>
+        <div class="secret-display hidden-num" id="secret-display">? ? ?</div>
+      </div>
+
+      <!-- Guess input -->
+      <div class="guess-block">
+        <label for="guess-input">Nombor Teka Kamu</label>
+        <input type="number" id="guess-input" placeholder="0" disabled>
+      </div>
+
+      <!-- Buttons -->
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-check" disabled>Semak</button>
+        <button class="btn btn-ghost" id="btn-reset">Reset</button>
+      </div>
+
+      <!-- Result -->
+      <div class="result-block" id="result-block"></div>
+
+      <!-- History -->
+      <div class="history-block" id="history-block" style="display:none;">
+        <div class="history-label">Rekod Teka</div>
+        <div class="history-list" id="history-list"></div>
+      </div>
+
     </div>
-
-    <div id="result-box" style="min-height: 60px; border-radius: var(--border-radius-md); padding: 0.75rem 1rem; font-size: 14px; display: none;"></div>
-
-    <div style="margin-top: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
-      <span style="font-size: 13px; color: var(--color-text-secondary);">Cuba: <strong id="attempts">0</strong></span>
-      <button id="reset-btn" style="font-size: 13px; padding: 6px 14px; cursor: pointer;">
-        <i class="ti ti-refresh" aria-hidden="true"></i> Main Semula
-      </button>
-    </div>
-
-    <div id="history" style="margin-top: 1.25rem; display: none;">
-      <p style="font-size: 12px; color: var(--color-text-tertiary); margin: 0 0 6px;">Rekod tekaan:</p>
-      <div id="history-list" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
-    </div>
-
   </div>
-</div>
 
-<script>
-$(function() {
-  let secret, attempts, done;
+  --JQuery File--
+  <script src="jquery-2.1.0.min.js"></script>
+  <script>
+    $(function () {
 
-  function init() {
-    secret = Math.floor(Math.random() * 100) + 1;
-    attempts = 0;
-    done = false;
-    $('#attempts').text(0);
-    $('#result-box').hide().text('');
-    $('#guess-input').val('').prop('disabled', false).focus();
-    $('#guess-btn').prop('disabled', false);
-    $('#history').hide();
-    $('#history-list').empty();
-  }
+      var secretNumber = null;
+      var revealed = false;
+      var history = [];
 
-  function showResult(msg, type) {
-    const colors = {
-      success: { bg: 'var(--color-background-success)', color: 'var(--color-text-success)', border: 'var(--color-border-success)' },
-      danger:  { bg: 'var(--color-background-danger)',  color: 'var(--color-text-danger)',  border: 'var(--color-border-danger)'  },
-      info:    { bg: 'var(--color-background-info)',    color: 'var(--color-text-info)',    border: 'var(--color-border-info)'    },
-    };
-    const c = colors[type] || colors.info;
-    $('#result-box')
-      .css({ background: c.bg, color: c.color, border: '0.5px solid ' + c.border })
-      .text(msg)
-      .show();
-  }
+      // Generate random number
+      function generateNumber() {
+        var min = parseInt($('#range-min').val());
+        var max = parseInt($('#range-max').val());
 
-  function addBadge(num, correct) {
-    const badge = $('<span>').text(num).css({
-      display: 'inline-block',
-      padding: '2px 10px',
-      borderRadius: '999px',
-      fontSize: '12px',
-      fontWeight: '500',
-      background: correct ? 'var(--color-background-success)' : 'var(--color-background-secondary)',
-      color: correct ? 'var(--color-text-success)' : 'var(--color-text-secondary)',
-      border: '0.5px solid ' + (correct ? 'var(--color-border-success)' : 'var(--color-border-tertiary)')
+        if (isNaN(min) || isNaN(max) || min >= max) {
+          showResult('Tetapkan julat yang sah (Min < Max).', 'wrong', '');
+          return;
+        }
+
+        secretNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+        revealed = false;
+        history = [];
+
+        $('#secret-display')
+          .text('? ? ?')
+          .removeClass('hidden-num')
+          .addClass('hidden-num')
+          .removeClass('pop');
+
+        $('#guess-input').val('').prop('disabled', false).focus();
+        $('#btn-check').prop('disabled', false);
+        $('#result-block').empty();
+        $('#history-block').hide();
+        $('#history-list').empty();
+      }
+
+      // Check guess
+      function checkGuess() {
+        if (secretNumber === null) {
+          showResult('Jana nombor dahulu.', 'wrong', '');
+          return;
+        }
+
+        var guess = parseInt($('#guess-input').val());
+
+        if (isNaN(guess)) {
+          $('#guess-input').addClass('shake');
+          setTimeout(function () { $('#guess-input').removeClass('shake'); }, 400);
+          showResult('Masukkan nombor yang sah.', 'wrong', '');
+          return;
+        }
+
+        var isCorrect = guess === secretNumber;
+
+        // Add to history
+        history.push({ val: guess, correct: isCorrect });
+        renderHistory();
+
+        if (isCorrect) {
+          revealed = true;
+          $('#secret-display')
+            .text(secretNumber)
+            .removeClass('hidden-num')
+            .addClass('pop');
+          setTimeout(function () { $('#secret-display').removeClass('pop'); }, 350);
+
+          showResult('BETUL!', 'correct', 'Kamu teka ' + history.length + ' kali.');
+          $('#btn-check').prop('disabled', true);
+          $('#guess-input').prop('disabled', true);
+        } else {
+          var hint = guess < secretNumber ? 'Terlalu rendah. Cuba lebih tinggi.' : 'Terlalu tinggi. Cuba lebih rendah.';
+          $('#guess-input').addClass('shake');
+          setTimeout(function () { $('#guess-input').removeClass('shake'); }, 400);
+          showResult('SALAH!', 'wrong', hint);
+          $('#guess-input').val('').focus();
+        }
+      }
+
+      function showResult(msg, type, sub) {
+        var html = '<div class="result-msg ' + type + ' fade-in">' + msg + '</div>';
+        if (sub) html += '<div class="result-sub fade-in">' + sub + '</div>';
+        $('#result-block').html(html);
+      }
+
+      function renderHistory() {
+        $('#history-block').show();
+        $('#history-list').empty();
+        $.each(history, function (i, item) {
+          var tag = $('<span>')
+            .addClass('history-tag ' + (item.correct ? 'correct' : 'wrong'))
+            .text(item.val);
+          $('#history-list').append(tag);
+        });
+      }
+
+      function resetGame() {
+        secretNumber = null;
+        revealed = false;
+        history = [];
+        $('#secret-display').text('? ? ?').addClass('hidden-num');
+        $('#guess-input').val('').prop('disabled', true);
+        $('#btn-check').prop('disabled', true);
+        $('#result-block').empty();
+        $('#history-block').hide();
+        $('#history-list').empty();
+      }
+
+      // Event bindings
+      $('#btn-generate').on('click', generateNumber);
+      $('#btn-check').on('click', checkGuess);
+      $('#btn-reset').on('click', resetGame);
+
+      $('#guess-input').on('keypress', function (e) {
+        if (e.which === 13) checkGuess();
+      });
+
     });
-    $('#history-list').append(badge);
-    $('#history').show();
-  }
+  </script>
 
-  function submit() {
-    if (done) return;
-    const val = parseInt($('#guess-input').val());
-    if (isNaN(val) || val < 1 || val > 100) {
-      showResult('Masukkan nombor antara 1 dan 100.', 'info');
-      return;
-    }
-
-    attempts++;
-    $('#attempts').text(attempts);
-    addBadge(val, val === secret);
-
-    if (val === secret) {
-      showResult('Betul! Anda teka nombor ' + secret + ' dalam ' + attempts + ' percubaan.', 'success');
-      done = true;
-      $('#guess-input').prop('disabled', true);
-      $('#guess-btn').prop('disabled', true);
-    } else if (val < secret) {
-      showResult('Salah. Cuba nombor yang lebih tinggi.', 'danger');
-    } else {
-      showResult('Salah. Cuba nombor yang lebih rendah.', 'danger');
-    }
-
-    $('#guess-input').val('').focus();
-  }
-
-  $('#guess-btn').on('click', submit);
-
-  $('#guess-input').on('keydown', function(e) {
-    if (e.key === 'Enter') submit();
-  });
-
-  $('#reset-btn').on('click', init);
-
-  init();
-});
-</script>
+</body>
+</html>
