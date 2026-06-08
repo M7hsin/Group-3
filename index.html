@@ -1,69 +1,91 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Teka Nombor</title>
-  <link rel="stylesheet" href="style.css">
+    <title>Teka Nombor</title>
+
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+            background-color: #f4f4f4;
+        }
+
+        .container{
+            width: 300px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px gray;
+        }
+
+        input{
+            width: 80%;
+            padding: 10px;
+            margin: 10px;
+        }
+
+        button{
+            padding: 10px 20px;
+            background-color: blue;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #result{
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="wrapper">
-    <div class="card">
+<div class="container">
+    <h2>Teka Nombor (1 - 10)</h2>
 
-      <div class="label">Permainan</div>
-      <h1 class="title">Teka<br><span>Nombor.</span></h1>
+    <input type="number" id="guess" placeholder="Masukkan nombor">
 
-      <!-- Range selection -->
-      <div class="range-row">
-        <div class="range-field">
-          <label>Min</label>
-          <input type="number" id="range-min" value="1" min="0">
-        </div>
-        <div class="range-sep">—</div>
-        <div class="range-field">
-          <label>Max</label>
-          <input type="number" id="range-max" value="100" min="1">
-        </div>
-      </div>
+    <br>
 
-      <button class="btn btn-ghost" id="btn-generate" style="width:100%; margin-bottom:0;">Jana Nombor Random</button>
+    <button id="checkBtn">Semak</button>
 
-      <div class="divider"></div>
+    <div id="result"></div>
+</div>
 
-      <!-- Secret number display -->
-      <div class="secret-block">
-        <div class="label">Nombor Rahsia</div>
-        <div class="secret-display hidden-num" id="secret-display">? ? ?</div>
-      </div>
+<script>
+$(document).ready(function(){
 
-      <!-- Guess input -->
-      <div class="guess-block">
-        <label for="guess-input">Nombor Teka Kamu</label>
-        <input type="number" id="guess-input" placeholder="0" disabled>
-      </div>
+    $("#checkBtn").click(function(){
 
-      <!-- Buttons -->
-      <div class="btn-row">
-        <button class="btn btn-primary" id="btn-check" disabled>Semak</button>
-        <button class="btn btn-ghost" id="btn-reset">Reset</button>
-      </div>
+        // Jana nombor rawak antara 1 hingga 10
+        let randomNum = Math.floor(Math.random() * 10) + 1;
 
-      <!-- Result -->
-      <div class="result-block" id="result-block"></div>
+        // Ambil nombor yang dimasukkan pengguna
+        let userNum = $("#guess").val();
 
-      <!-- History -->
-      <div class="history-block" id="history-block" style="display:none;">
-        <div class="history-label">Rekod Teka</div>
-        <div class="history-list" id="history-list"></div>
-      </div>
+        // Semak jawapan
+        if(userNum == randomNum){
+            $("#result").html(
+                "✅ Betul! Nombor rawak ialah " + randomNum
+            );
+        }
+        else{
+            $("#result").html(
+                "❌ Salah! Nombor rawak ialah " + randomNum
+            );
+        }
 
-    </div>
-  </div>
+    });
 
-  <!-- jQuery -->
-  <script src="js/jquery-2.1.0.min.js"></script>
-<script src="script.js"></script>
+});
+</script>
 
 </body>
 </html>
