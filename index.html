@@ -1,0 +1,114 @@
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<h2 class="sr-only">Permainan Teka Nombor menggunakan jQuery</h2>
+
+<div style="max-width: 420px; margin: 2rem auto; padding: 0 1rem;">
+
+  <div style="background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.5rem;">
+
+    <p style="font-size: 13px; color: var(--color-text-secondary); margin: 0 0 1.5rem;">Nombor rawak dijana antara 1 hingga 100. Cuba teka!</p>
+
+    <div style="display: flex; gap: 8px; margin-bottom: 1rem;">
+      <input type="number" id="guess-input" min="1" max="100" placeholder="Masukkan nombor..." style="flex: 1; font-size: 15px;" />
+      <button id="guess-btn" style="padding: 0 1.25rem; font-size: 14px; cursor: pointer;">Teka</button>
+    </div>
+
+    <div id="result-box" style="min-height: 60px; border-radius: var(--border-radius-md); padding: 0.75rem 1rem; font-size: 14px; display: none;"></div>
+
+    <div style="margin-top: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+      <span style="font-size: 13px; color: var(--color-text-secondary);">Cuba: <strong id="attempts">0</strong></span>
+      <button id="reset-btn" style="font-size: 13px; padding: 6px 14px; cursor: pointer;">
+        <i class="ti ti-refresh" aria-hidden="true"></i> Main Semula
+      </button>
+    </div>
+
+    <div id="history" style="margin-top: 1.25rem; display: none;">
+      <p style="font-size: 12px; color: var(--color-text-tertiary); margin: 0 0 6px;">Rekod tekaan:</p>
+      <div id="history-list" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+$(function() {
+  let secret, attempts, done;
+
+  function init() {
+    secret = Math.floor(Math.random() * 100) + 1;
+    attempts = 0;
+    done = false;
+    $('#attempts').text(0);
+    $('#result-box').hide().text('');
+    $('#guess-input').val('').prop('disabled', false).focus();
+    $('#guess-btn').prop('disabled', false);
+    $('#history').hide();
+    $('#history-list').empty();
+  }
+
+  function showResult(msg, type) {
+    const colors = {
+      success: { bg: 'var(--color-background-success)', color: 'var(--color-text-success)', border: 'var(--color-border-success)' },
+      danger:  { bg: 'var(--color-background-danger)',  color: 'var(--color-text-danger)',  border: 'var(--color-border-danger)'  },
+      info:    { bg: 'var(--color-background-info)',    color: 'var(--color-text-info)',    border: 'var(--color-border-info)'    },
+    };
+    const c = colors[type] || colors.info;
+    $('#result-box')
+      .css({ background: c.bg, color: c.color, border: '0.5px solid ' + c.border })
+      .text(msg)
+      .show();
+  }
+
+  function addBadge(num, correct) {
+    const badge = $('<span>').text(num).css({
+      display: 'inline-block',
+      padding: '2px 10px',
+      borderRadius: '999px',
+      fontSize: '12px',
+      fontWeight: '500',
+      background: correct ? 'var(--color-background-success)' : 'var(--color-background-secondary)',
+      color: correct ? 'var(--color-text-success)' : 'var(--color-text-secondary)',
+      border: '0.5px solid ' + (correct ? 'var(--color-border-success)' : 'var(--color-border-tertiary)')
+    });
+    $('#history-list').append(badge);
+    $('#history').show();
+  }
+
+  function submit() {
+    if (done) return;
+    const val = parseInt($('#guess-input').val());
+    if (isNaN(val) || val < 1 || val > 100) {
+      showResult('Masukkan nombor antara 1 dan 100.', 'info');
+      return;
+    }
+
+    attempts++;
+    $('#attempts').text(attempts);
+    addBadge(val, val === secret);
+
+    if (val === secret) {
+      showResult('Betul! Anda teka nombor ' + secret + ' dalam ' + attempts + ' percubaan.', 'success');
+      done = true;
+      $('#guess-input').prop('disabled', true);
+      $('#guess-btn').prop('disabled', true);
+    } else if (val < secret) {
+      showResult('Salah. Cuba nombor yang lebih tinggi.', 'danger');
+    } else {
+      showResult('Salah. Cuba nombor yang lebih rendah.', 'danger');
+    }
+
+    $('#guess-input').val('').focus();
+  }
+
+  $('#guess-btn').on('click', submit);
+
+  $('#guess-input').on('keydown', function(e) {
+    if (e.key === 'Enter') submit();
+  });
+
+  $('#reset-btn').on('click', init);
+
+  init();
+});
+</script>
